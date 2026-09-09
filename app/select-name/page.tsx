@@ -3,11 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const FAMILY_MEMBERS = ['Світлана', 'Микола', 'Аня']
+const FAMILY_MEMBERS = ['Світлана', 'Микола', 'Аня', 'Ілля']
 
 export default function SelectNamePage() {
-  const [customName, setCustomName] = useState('')
-  const [showCustom, setShowCustom] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -23,18 +21,13 @@ export default function SelectNamePage() {
       })
 
       if (res.ok) {
-        router.push('/gallery')
+        router.push(name === 'Світлана' ? '/welcome' : '/gallery')
       }
     } catch {
       // тихо ігноруємо помилку
     } finally {
       setLoading(false)
     }
-  }
-
-  function handleCustomSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    selectName(customName)
   }
 
   return (
@@ -84,63 +77,6 @@ export default function SelectNamePage() {
             </button>
           ))}
 
-          {!showCustom ? (
-            <button
-              onClick={() => setShowCustom(true)}
-              disabled={loading}
-              style={{
-                backgroundColor: 'transparent',
-                border: '1px dashed var(--border)',
-                borderRadius: '10px',
-                padding: '16px',
-                fontSize: '15px',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              Інший...
-            </button>
-          ) : (
-            <form onSubmit={handleCustomSubmit} className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                placeholder="Введіть ваше ім'я"
-                autoFocus
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  color: 'var(--text)',
-                  fontSize: '15px',
-                  outline: 'none',
-                  width: '100%',
-                }}
-              />
-              <button
-                type="submit"
-                disabled={loading || !customName.trim()}
-                style={{
-                  backgroundColor:
-                    loading || !customName.trim()
-                      ? 'var(--border)'
-                      : 'var(--accent)',
-                  color: 'var(--text)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  fontSize: '15px',
-                  fontWeight: 500,
-                  cursor: loading || !customName.trim() ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Продовжити
-              </button>
-            </form>
-          )}
         </div>
       </div>
     </div>

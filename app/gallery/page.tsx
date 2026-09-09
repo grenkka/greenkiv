@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { FolderPlus } from 'lucide-react'
 import GalleryHeader from '@/components/gallery/GalleryHeader'
+import Modal from '@/components/ui/Modal'
 import FolderCard from '@/components/gallery/FolderCard'
 import MediaCard from '@/components/gallery/MediaCard'
 import SortControls, { SortOption } from '@/components/gallery/SortControls'
@@ -38,6 +38,7 @@ export default function GalleryPage() {
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
   const [memberName, setMemberName] = useState('')
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [newFolderOpen, setNewFolderOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [creatingFolder, setCreatingFolder] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -117,6 +118,7 @@ export default function GalleryPage() {
       })
       if (res.ok) {
         setNewFolderName('')
+        setNewFolderOpen(false)
         await loadData()
       }
     } catch {
@@ -193,80 +195,20 @@ export default function GalleryPage() {
 
         {/* Папки */}
         <section style={{ marginBottom: '40px' }}>
-          <div
+          <h2
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
+              fontSize: '15px',
+              fontWeight: 600,
+              color: 'var(--text)',
               marginBottom: '16px',
-              flexWrap: 'wrap',
             }}
           >
-            <h2
-              style={{
-                fontSize: '15px',
-                fontWeight: 600,
-                color: 'var(--text)',
-                margin: 0,
-              }}
-            >
-              Папки
-            </h2>
-
-            {/* Нова папка */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleCreateFolder()
-              }}
-              style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
-            >
-              <input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Назва нової папки"
-                style={{
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '7px',
-                  padding: '5px 10px',
-                  fontSize: '13px',
-                  color: 'var(--text)',
-                  outline: 'none',
-                  width: '180px',
-                }}
-              />
-              <button
-                type="submit"
-                disabled={!newFolderName.trim() || creatingFolder}
-                title="Створити папку"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '5px 10px',
-                  backgroundColor: newFolderName.trim() ? 'var(--accent)' : 'var(--border)',
-                  color: 'var(--text)',
-                  border: 'none',
-                  borderRadius: '7px',
-                  fontSize: '13px',
-                  cursor: newFolderName.trim() ? 'pointer' : 'not-allowed',
-                }}
-              >
-                <FolderPlus size={14} />
-                Нова папка
-              </button>
-            </form>
-          </div>
+            Папки
+          </h2>
 
           {loading ? (
             <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
               Завантаження...
-            </p>
-          ) : displayFolders.length === 0 ? (
-            <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
-              Папок ще немає
             </p>
           ) : (
             <div className="folder-grid">
@@ -279,6 +221,32 @@ export default function GalleryPage() {
                   onRename={handleRenameFolder}
                 />
               ))}
+              <button
+                onClick={() => setNewFolderOpen(true)}
+                style={{
+                  border: '2px dashed var(--border)',
+                  borderRadius: '10px',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '100px',
+                  color: 'var(--text-muted)',
+                  fontSize: '28px',
+                  transition: 'border-color 0.15s, color 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--accent)'
+                  e.currentTarget.style.color = 'var(--text)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border)'
+                  e.currentTarget.style.color = 'var(--text-muted)'
+                }}
+              >
+                +
+              </button>
             </div>
           )}
         </section>
@@ -333,6 +301,69 @@ export default function GalleryPage() {
           )}
         </section>
       </main>
+
+      <Modal
+        isOpen={newFolderOpen}
+        onClose={() => { setNewFolderOpen(false); setNewFolderName('') }}
+        title="Нова папка"
+        maxWidth={360}
+      >
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleCreateFolder() }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+        >
+          <input
+            type="text"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            placeholder="Назва папки"
+            autoFocus
+            style={{
+              backgroundColor: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              fontSize: '15px',
+              color: 'var(--text)',
+              outline: 'none',
+              width: '100%',
+            }}
+          />
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => { setNewFolderOpen(false); setNewFolderName('') }}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'transparent',
+                color: 'var(--text)',
+                fontSize: '14px',
+                cursor: 'pointer',
+              }}
+            >
+              Назад
+            </button>
+            <button
+              type="submit"
+              disabled={!newFolderName.trim() || creatingFolder}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: newFolderName.trim() ? 'var(--accent)' : 'var(--border)',
+                color: 'var(--text)',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: newFolderName.trim() ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Створити
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       <UploadModal
         isOpen={uploadOpen}
