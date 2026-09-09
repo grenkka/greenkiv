@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #FAF7F2;
+  --surface: #F2E8E0;
+  --accent: #E8C4A0;
+  --text: #3D3530;
+  --text-muted: #8A7570;
+  --border: #E0D5CC;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ─── Responsive header ─── */
+.header-search-desktop { display: flex; }
+.header-search-mobile  { display: none; }
+.header-name           { display: inline; }
+
+@media (max-width: 600px) {
+  .header-search-desktop { display: none; }
+  .header-search-mobile  { display: flex; }
+  .header-name           { display: none; }
+}
+
+/* ─── Mobile modal ─── */
+@media (max-width: 600px) {
+  .modal-panel {
+    position: fixed !important;
+    inset: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    overflow-y: auto !important;
+  }
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+}
+
+/* ─── Gallery grid ─── */
+.folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .folder-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .media-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* ─── Touch-friendly tap targets ─── */
+button, a, select, input[type="file"] {
+  min-height: 40px;
+}
+input[type="text"],
+input[type="password"],
+input[type="search"],
+select {
+  font-size: 16px; /* prevents iOS zoom */
 }
