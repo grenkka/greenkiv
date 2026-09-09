@@ -31,3 +31,7 @@ export async function deleteFromR2(key: string) {
 export async function getSignedR2Url(key: string, expiresIn = 3600) {
   return getSignedUrl(r2, new GetObjectCommand({ Bucket: BUCKET, Key: key }), { expiresIn })
 }
+
+export async function getSignedUploadUrl(key: string, contentType: string, expiresIn = 3600) {
+  return getSignedUrl(r2, new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType }), { expiresIn })
+}

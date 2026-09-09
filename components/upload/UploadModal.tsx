@@ -85,29 +85,68 @@ export default function UploadModal({
         )
       )
 
-      const formData = new FormData()
-      formData.append('file', files[i].file)
-      if (selectedFolderId) formData.append('folder_id', selectedFolderId)
+      const file = files[i].file
 
       try {
-        const res = await fetch('/api/media/upload', {
+        // 1. Отримати підписаний URL для завантаження прямо в R2
+        const presignRes = await fetch('/api/media/presign', {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, contentType: file.type }),
         })
 
-        if (res.ok) {
+        if (!presignRes.ok) {
+          const err = await presignRes.json().catch(() => ({}))
+          setFiles((prev) =>
+            prev.map((f, idx) =>
+              idx === i ? { ...f, status: 'error', error: err.error || 'Помилка' } : f
+            )
+          )
+          continue
+        }
+
+        const { uploadUrl, storageKey } = await presignRes.json()
+
+        // 2. Завантажити файл прямо в R2 (оминає Vercel)
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': file.type },
+        })
+
+        if (!uploadRes.ok) {
+          setFiles((prev) =>
+            prev.map((f, idx) =>
+              idx === i ? { ...f, status: 'error', error: 'Помилка завантаження' } : f
+            )
+          )
+          continue
+        }
+
+        // 3. Зберегти метадані в базі
+        const confirmRes = await fetch('/api/media/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storageKey,
+            name: file.name,
+            contentType: file.type,
+            size: file.size,
+            folderId: selectedFolderId || null,
+          }),
+        })
+
+        if (confirmRes.ok) {
           setFiles((prev) =>
             prev.map((f, idx) =>
               idx === i ? { ...f, status: 'done', progress: 100 } : f
             )
           )
         } else {
-          const err = await res.json().catch(() => ({}))
+          const err = await confirmRes.json().catch(() => ({}))
           setFiles((prev) =>
             prev.map((f, idx) =>
-              idx === i
-                ? { ...f, status: 'error', error: err.error || 'Помилка' }
-                : f
+              idx === i ? { ...f, status: 'error', error: err.error || 'Помилка' } : f
             )
           )
         }
