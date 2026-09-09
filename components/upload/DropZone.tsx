@@ -73,7 +73,7 @@ export default function DropZone({ onFiles }: DropZoneProps) {
         accept={ACCEPTED}
         multiple
         onChange={handleChange}
-        style={{ display: 'none' }}
+        style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
       />
     </label>
   )
