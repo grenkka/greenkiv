@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const sanitizedName = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
   const storageKey = `${Date.now()}_${sanitizedName}`
 
-  const uploadUrl = await getSignedUploadUrl(storageKey, contentType)
+  const uploadUrl = await getSignedUploadUrl(storageKey)
 
   return Response.json({ uploadUrl, storageKey })
 }
